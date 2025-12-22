@@ -4,6 +4,9 @@ HowToLogin is a tool that tests web application login pages for login bypass. HT
 > [!NOTE]
 > You can try this tool with https://github.com/akinerkisa/renikApp login bypass page section.
 
+> [!NOTE]
+> You can install HTLogin Burp Suite extension from https://github.com/akinerkisa/HTLogin/burpsuite_extension page.
+
 ## Installation
 <code>git clone https://github.com/akinerkisa/HTLogin</code>
 <p><code>cd HTLogin</code></p>
