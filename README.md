@@ -58,7 +58,7 @@ Use with: `python main.py -u https://example.com/login --config config.json`
 > You can try this tool with https://github.com/akinerkisa/renikApp login bypass page section.
 
 > [!NOTE]
-> You can install HTLogin Burp Suite extension from https://github.com/akinerkisa/HTLogin/burpsuite_extension page.
+> You can install HTLogin Burp Suite extension from https://github.com/akinerkisa/HTLogin/tree/mainburpsuite_extension page.
 
 ## Installation
 
@@ -346,13 +346,13 @@ HTLogin supports Selenium for testing Single Page Applications (SPAs) where logi
 **Usage:**
 ```bash
 # Enable Selenium via CLI (SPA / JavaScript-rendered login forms)
-python main.py -u https://example.com/login --use-selenium
+python main.py -u https://spa.nonexistapplication/login --use-selenium
 
 # Configure wait time (default: 5 seconds)
-python main.py -u https://example.com/login --use-selenium --selenium-wait-time 10
+python main.py -u https://spa.nonexistapplication/login --use-selenium --selenium-wait-time 10
 
 # Example: behind Cloudflare + SPA
-python main.py -u https://play.picoctf.org/login --use-selenium -p http://127.0.0.1:8080
+python main.py -u https://cloudflare.spa.nonexistapplication/login --use-selenium -p http://127.0.0.1:8080
 ```
 
 **Config file:**
