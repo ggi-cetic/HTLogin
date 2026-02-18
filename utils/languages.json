@@ -1,0 +1,20 @@
+{
+    "en": {
+        "success": ["welcome", "dashboard", "profile", "logged in", "successful"],
+        "failure": ["invalid", "incorrect", "failed", "error", "try again"],
+        "login_keywords": ["login", "sign in", "signin", "sign-in", "authenticate", "auth", "administrator", "admin", "access", "account"],
+        "error_indicators": ["missing parameter", "error", "invalid", "bad request", "unauthorized", "forbidden"],
+        "login_indicators": ["login", "sign in", "authenticate"],
+        "generic_indicators": ["welcome", "success", "logged in", "authenticated"],
+        "specific_indicators": ["admin", "administrator", "user:", "username:", "account:"]
+    },
+    "tr": {
+        "success": ["hosgeldiniz", "kontrol paneli", "profil", "giriş yapıldı", "başarılı"],
+        "failure": ["geçersiz", "yanlış", "başarısız", "hata", "tekrar deneyin"],
+        "login_keywords": ["giriş", "giriş yap", "oturum aç", "kimlik doğrulama", "yönetici", "admin", "erişim", "hesap"],
+        "error_indicators": ["eksik parametre", "hata", "geçersiz", "hatalı istek", "yetkisiz", "yasak"],
+        "login_indicators": ["giriş", "giriş yap", "oturum aç", "kimlik doğrulama"],
+        "generic_indicators": ["hosgeldiniz", "başarılı", "giriş yapıldı", "kimlik doğrulandı"],
+        "specific_indicators": ["admin", "yönetici", "kullanıcı:", "kullanıcı adı:", "hesap:"]
+    }
+}
