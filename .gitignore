@@ -43,8 +43,11 @@ output.txt
 output.json
 output.html
 *.txt
-*.json
 *.html
+*.json
+
+!config.example.json 
+!utils/languages.json
 
 # Config files (user-specific)
 config.json
