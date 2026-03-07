@@ -450,9 +450,6 @@ python3 main.py -u https://example.com/login -o report.json -of json
 python3 main.py -u https://example.com/login -o report.html -of html
 ```
 
-## Example Output
-![Output.](https://github.com/akinerkisa/HTLogin/blob/main/output.png)
-
 ## Testing
 
 HTLogin includes a comprehensive test suite. To run the tests:
