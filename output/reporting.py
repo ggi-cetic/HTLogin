@@ -15,7 +15,7 @@ class ReportGenerator:
         report = {
             "metadata": {
                 "tool": "HTLogin",
-                "version": "1.0.0",
+                "version": "1.0.1",
                 "generated_at": datetime.now().isoformat(),
                 "total_targets": len(results_list)
             },
