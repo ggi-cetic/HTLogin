@@ -9,12 +9,12 @@ if os.path.exists(readme_path):
 
 setup(
     name='htlogin',
-    version='1.0.1',
+    version='1.0.0',
     description='Login Security Testing Tool - Tests web application login pages for bypass vulnerabilities',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='akinerkisa',
-    url='https://github.com/akinerkisa/HTLogin',
+    url='https://github.com/ggi-cetic/HTLogin forked from https://github.com/akinerkisa/HTLogin',
     packages=find_packages(exclude=['renikApp', 'tests']),
     py_modules=['main'],
     package_data={
