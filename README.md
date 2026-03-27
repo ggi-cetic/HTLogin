@@ -15,6 +15,12 @@ pip install -r requirements.txt
 # Test a single URL
 python main.py -u https://example.com/login
 
+# Test all payloads instead of stopping at first hit
+python main.py -u https://example.com/login --mode full
+
+# Allow self-signed or invalid SSL certificates
+python main.py -u https://example.com/login -k
+
 # Test multiple URLs from a file
 python main.py -l urls.txt
 
@@ -30,6 +36,9 @@ python main.py -u https://example.com/login -p http://127.0.0.1:8080
 # Use Selenium for SPA applications (JavaScript-rendered forms)
 python main.py -u https://example.com/login --use-selenium
 
+# Test Angular/React/Vue SPA login routes
+python main.py -u http://example.local:3000/#/login --mode full
+
 # Use custom User-Agent
 python main.py -u https://example.com/login --user-agent "HTLogin/1.0.1"
 
@@ -41,7 +50,9 @@ python main.py -u https://example.com/login --user-agent "HTLogin/1.0.1"
 - Username enumeration
 - CAPTCHA detection
 - Rate limiting (detects missing or weak rate limits)
-- API endpoints (JSON/GraphQL) when forms not found
+- API endpoints (JSON/GraphQL) when forms are not found or when SPA login flows are detected
+- Self-signed HTTPS targets with optional insecure SSL mode
+- Multi-form login pages and named submit button workflows
 
 **Config file (optional):**
 ```json
@@ -49,7 +60,9 @@ python main.py -u https://example.com/login --user-agent "HTLogin/1.0.1"
   "test_account_username": "test@example.com",
   "test_account_password": "testpass123",
   "timeout": 15,
-  "verbose": true
+  "verbose": true,
+  "scan_mode": "full",
+  "verify_ssl": false
 }
 ```
 Use with: `python main.py -u https://example.com/login --config config.json`
@@ -93,6 +106,8 @@ Flag | Short | Description | Example | Default | Required
 --use-selenium | | Use Selenium to render JavaScript (for SPA applications) | python3 main.py --use-selenium | false | No |
 --selenium-wait-time | | Selenium page load wait time in seconds | python3 main.py --selenium-wait-time 10 | 5 | No |
 --user-agent | | Custom User-Agent string for HTTP requests | python3 main.py --user-agent "HTLogin/1.0.0" | Default browser UA | No |
+--mode | -m | Scan mode: `quick` stops at first hit, `full` tests all payloads | python3 main.py -m full | quick | No |
+--insecure | -k | Disable SSL certificate verification | python3 main.py -k -u https://target/login | false | No |
 
 ## List File Example Format
 ```
@@ -107,10 +122,17 @@ http://127.0.0.1:5000/lp/rate-limit-login
 - XPath Injection login bypass testing
 - LDAP Injection login bypass testing
 - Default Credentials testing
+- Credentials are tested before injection payloads in form-based scans
 - CAPTCHA detection - Automatically detects CAPTCHA protection
 - Username enumeration testing** - Detects if system reveals valid usernames
 - Test account support - Use known credentials for baseline analysis
 - Automatic API detection - Automatically detects and tests JSON API and GraphQL endpoints when forms are not found
+- SPA login support - Detects and tests Angular/React/Vue-style login flows and hash routes
+- Multi-form support - Selects the real login form instead of blindly using the first form on the page
+- Submit button support - Preserves named submit buttons such as `button=login` when required by the server
+- SSL bypass option - Supports self-signed lab targets with `-k/--insecure`
+- Quick/full scan modes - Stop at the first valid hit or test every payload
+- API XPath testing - SPA/API mode now includes XPath injection testing as well
 - Multi-lang support for keyword check
 - URL list support
 - Proxy support for requests
@@ -122,6 +144,53 @@ http://127.0.0.1:5000/lp/rate-limit-login
 - Configurable confidence thresholds
 - Retry mechanism with exponential backoff
 - CSRF token detection and handling
+
+## Scan Modes
+
+HTLogin supports two scan modes:
+
+- **quick**: stops at the first successful payload for each injection family
+- **full**: tests all payloads in each injection family and reports every hit found
+
+Examples:
+
+```bash
+# Default behavior
+python main.py -u https://example.com/login --mode quick
+
+# Exhaustive payload testing
+python main.py -u https://example.com/login --mode full
+```
+
+Use `full` when validating a lab, building a report, or comparing multiple vulnerable payloads.
+
+## Insecure SSL Mode
+
+For internal labs, self-signed certificates, or temporary test environments, HTLogin can skip certificate verification:
+
+```bash
+python main.py -k -u https://192.168.1.10/login
+```
+
+This maps to `verify_ssl: false` in the configuration file.
+
+## SPA and Modern Login Flow Support
+
+HTLogin now handles modern login workflows more reliably:
+
+- detects classic HTML forms even when multiple forms are present on the same page
+- preserves hidden fields such as `ReturnUrl`
+- preserves named submit buttons when they are required by the backend
+- avoids misclassifying server-side CSRF-protected forms as client-side SPA forms
+- automatically switches to API endpoint testing when a hash-route or SPA login flow is detected
+- tests **Default Credentials**, **SQL**, **NoSQL**, **XPath**, **LDAP**, and **Rate Limit** in SPA/API mode
+
+Typical supported targets include:
+
+- ASP.NET / ASP.NET Identity login pages
+- Laravel/Django-style CSRF-protected forms
+- Angular routes like `/#/login`
+- React/Vue SPAs backed by JSON auth endpoints
   
 ## How HTLogin Extracts Successful Login Attempts
 
@@ -133,6 +202,7 @@ HTLogin analyzes the following signals:
 
 **Positive Signals (increase confidence):**
 - **302 Redirect to non-login page** (+40): Redirect to a different page indicates successful authentication
+- **Final URL changed to non-login page** (+70): Followed login flow ends on a non-login page such as `/admin`, `/users`, `/dashboard`
 - **Session Cookie** (+35): Presence of session/auth/token cookies
 - **Short Success Message** (+30): Success keywords in short response (<200 bytes)
 - **Success Keywords** (+20): Keywords like 'welcome', 'dashboard', 'profile', 'logged in', 'successful'
@@ -145,6 +215,7 @@ HTLogin analyzes the following signals:
 **Negative Signals (decrease confidence):**
 - **Failure Keywords** (-30): Keywords like 'invalid', 'incorrect', 'failed', 'error'
 - **Error Messages** (-20): Error patterns, exceptions, tracebacks
+- **Login Entry Page / Portal Landing Page** (-40): Response still looks like a login entry portal rather than a post-auth page
 - **Still on Login Page** (-15 to -25): Login indicators still present with similar content length (higher confidence when content length is very similar, within 50 bytes)
 - **Content Significantly Shorter (Error)** (-15): Response much shorter due to error message
 - **Content Length Changed (Error)** (-10): Content length change due to error message
@@ -190,6 +261,19 @@ The progressive mode can be configured via the config file:
 - `nosql_admin_patterns`: Custom regex patterns for admin discovery (default: ["admin.*", "administrator.*", "root.*", ".*admin.*", "adm.*"])
 
 If basic bypass fails, the system automatically stops to avoid false positives.
+
+## SPA/API Test Coverage
+
+When HTLogin detects a SPA/API authentication flow, it tests:
+
+- Default Credentials
+- SQL Injection
+- NoSQL Injection
+- XPath Injection
+- LDAP Injection
+- Rate Limiting
+
+This behavior now matches the classic form-based flow more closely.
 
 ## Multi-Language Support in Page Content Check
 When checking the page content, it is checked in English by default. However, you can edit this with parameters. You can also add different languages and keywords by editing the `languages.json` file. Currently English and Turkish are defined.
@@ -255,7 +339,9 @@ Example configuration (`config.example.json`):
   "use_selenium": false,
   "selenium_headless": true,
   "selenium_wait_time": 5,
-  "user_agent": null
+  "user_agent": null,
+  "scan_mode": "quick",
+  "verify_ssl": true
 }
 ```
 
@@ -283,6 +369,8 @@ Example configuration (`config.example.json`):
 - `selenium_headless`: Run Selenium in headless mode (default: true)
 - `selenium_wait_time`: Selenium page load wait time in seconds (default: 5)
 - `user_agent`: Custom User-Agent string for HTTP requests (default: null, uses default browser UA)
+- `scan_mode`: Scan mode - `quick` or `full` (default: "quick")
+- `verify_ssl`: Verify TLS/SSL certificates (default: true)
 
 ## CAPTCHA Detection
 
